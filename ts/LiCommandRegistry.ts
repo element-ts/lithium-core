@@ -33,14 +33,14 @@ export type LiCommandHandlerStructure<
 	LC extends LiCommandRegistryStructure<LC>,
 	RC extends LiCommandRegistryStructure<RC>,
 	C extends LiCommandName<LC>
-> = (value: LiCommandHandlerParam<LC, C>, socket: LiSocket<RC, LC>) => LiCommandHandlerReturnPromisified<LC, C>;
+> = (value: LiCommandHandlerParam<LC, C>, socket: LiSocket<LC, RC>) => LiCommandHandlerReturnPromisified<LC, C>;
 
 export type LiCommandRegistryMapValue = {
 	handler: LiCommandHandler;
 	allowPeerToPeer: boolean;
 };
 
-export class LiCommandRegistry<T extends LiCommandRegistryStructure<T>> {
+export class LiCommandRegistry<LC extends LiCommandRegistryStructure<LC>, RC extends LiCommandRegistryStructure<RC>> {
 
 	private commands: Map<string, LiCommandRegistryMapValue>;
 
@@ -50,7 +50,7 @@ export class LiCommandRegistry<T extends LiCommandRegistryStructure<T>> {
 
 	}
 
-	public implement<C extends LiCommandName<T>>(command: C, handler: LiCommandHandlerStructure<T, any, C>, allowPeerToPeer: boolean): void {
+	public implement<C extends LiCommandName<LC>>(command: C, handler: LiCommandHandlerStructure<LC, RC, C>, allowPeerToPeer: boolean): void {
 
 		this.commands.set(command, {handler, allowPeerToPeer});
 

@@ -40,7 +40,7 @@ export class LiSocket<
 	private readonly didReceiveId: (() => void) | undefined;
 	private readonly allowPeerToPeer: boolean;
 
-	protected commandRegistry: LiCommandRegistry<LC>;
+	protected commandRegistry: LiCommandRegistry<LC, RC>;
 	protected messageManager: LiMessageManager;
 
 	public onClose: ((code?: number, reason?: string) => void) | undefined;
@@ -48,12 +48,12 @@ export class LiSocket<
 
 	public static logger: Neon = new Neon();
 
-	public constructor(socket: SocketAble, commandRegistry?: LiCommandRegistry<LC>, id: string = "", onDidReceiveId: ((() => void) | undefined) = undefined, allowPeerToPeer: boolean = false, debug?: boolean) {
+	public constructor(socket: SocketAble, commandRegistry?: LiCommandRegistry<LC, RC>, id: string = "", onDidReceiveId: ((() => void) | undefined) = undefined, allowPeerToPeer: boolean = false, debug?: boolean) {
 
 		this.id = id;
 		this.socket = socket;
 
-		this.commandRegistry = commandRegistry || new LiCommandRegistry<LC>();
+		this.commandRegistry = commandRegistry || new LiCommandRegistry<LC, RC>();
 		this.messageManager = new LiMessageManager();
 		this.didReceiveId = onDidReceiveId;
 		this.allowPeerToPeer = allowPeerToPeer;
