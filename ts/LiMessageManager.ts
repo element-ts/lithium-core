@@ -37,7 +37,10 @@ export class LiMessageManager {
 
 	public getHandler(id: string): LiMessageHandler | undefined {
 
-		return this.messages.get(id);
+		const message = this.messages.get(id);
+		if (message === undefined) return undefined;
+		this.messages.delete(id);
+		return message;
 
 	}
 
