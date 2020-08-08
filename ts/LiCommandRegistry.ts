@@ -16,24 +16,24 @@ export type LiCommand<T extends LiCommandRegistryStructure, C extends LiCommandN
 export type LiCommandHandlerParam<
 	T extends LiCommandRegistryStructure<T>,
 	C extends LiCommandName<T>
-> = LiCommand<T, C>["param"];
+	> = LiCommand<T, C>["param"];
 
 
 export type LiCommandHandlerReturn<
 	T extends LiCommandRegistryStructure<T>,
 	C extends LiCommandName<T>
-> = LiCommand<T, C>["return"];
+	> = LiCommand<T, C>["return"];
 
 export type LiCommandHandlerReturnPromisified<
 	T extends LiCommandRegistryStructure<T>,
 	C extends LiCommandName<T>
-> = Promise<LiCommandHandlerReturn<T, C>>;
+	> = Promise<LiCommandHandlerReturn<T, C>>;
 
 export type LiCommandHandlerStructure<
 	LC extends LiCommandRegistryStructure<LC>,
 	RC extends LiCommandRegistryStructure<RC>,
 	C extends LiCommandName<LC>
-> = (value: LiCommandHandlerParam<LC, C>, socket: LiSocket<LC, RC>) => LiCommandHandlerReturnPromisified<LC, C>;
+	> = (value: LiCommandHandlerParam<LC, C>, socket: LiSocket<LC, RC>) => LiCommandHandlerReturnPromisified<LC, C>;
 
 export type LiCommandRegistryMapValue = {
 	handler: LiCommandHandler;

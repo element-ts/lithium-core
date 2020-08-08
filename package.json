@@ -1,6 +1,6 @@
 {
   "name": "@element-ts/lithium-core",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "The core libraries for @element-ts/lithium, a type-safe remote function invocation framework built on top of the WebSocket protocol.",
   "keywords": [],
   "main": "js/index",

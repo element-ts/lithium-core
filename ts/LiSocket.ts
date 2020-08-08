@@ -20,21 +20,12 @@ import {
 	LiCommandRegistryStructure
 } from "./LiCommandRegistry";
 
-export interface SocketAble {
-	close(): void;
-	send(data: string, handler: (err?: Error) => void): void;
-	onMessage(handler: (data: any) => void): void;
-	onClose(handler: (code?: number, reason?: string) => void): void;
-	onError(handler: (err: Error) => void): void;
-}
-
-export class LiSocket<
+export abstract class LiSocket<
 	LC extends LiCommandRegistryStructure<LC>,
 	RC extends LiCommandRegistryStructure<RC>,
 	SC extends LiCommandRegistryStructure<SC> = any
 	> {
 
-	private socket: SocketAble;
 	private id: string;
 	private isConnected: boolean = true;
 	private readonly didReceiveId: (() => void) | undefined;
@@ -48,24 +39,14 @@ export class LiSocket<
 
 	public static logger: Neon = new Neon();
 
-	public constructor(socket: SocketAble, commandRegistry?: LiCommandRegistry<LC, RC>, id: string = "", onDidReceiveId: ((() => void) | undefined) = undefined, allowPeerToPeer: boolean = false, debug?: boolean) {
+	protected constructor(commandRegistry?: LiCommandRegistry<LC, RC>, id: string = "", onDidReceiveId: ((() => void) | undefined) = undefined, allowPeerToPeer: boolean = false, debug?: boolean) {
 
 		this.id = id;
-		this.socket = socket;
 
 		this.commandRegistry = commandRegistry || new LiCommandRegistry<LC, RC>();
 		this.messageManager = new LiMessageManager();
 		this.didReceiveId = onDidReceiveId;
 		this.allowPeerToPeer = allowPeerToPeer;
-
-		this.onMessage = this.onMessage.bind(this);
-		this.socket.onMessage(this.onMessage);
-
-		this.handleOnClose = this.handleOnClose.bind(this);
-		this.socket.onClose(this.handleOnClose);
-
-		this.handleOnError = this.handleOnError.bind(this);
-		this.socket.onError(this.handleOnError);
 
 		if (debug) {
 			LiSocket.logger.enable();
@@ -89,6 +70,9 @@ export class LiSocket<
 
 	}
 
+	protected abstract handleClose(): void;
+	protected abstract handleSend(data: string, handler: (err?: Error) => void): void;
+
 	private send<T = any>(message: LiMessage<T>): Promise<void> {
 		return new Promise<void>((resolve: PromResolve<void>, reject: PromReject): void => {
 
@@ -98,7 +82,7 @@ export class LiSocket<
 
 			LiSocket.logger.log(`Will send message (${message.id}): '${messageString}'.`);
 
-			this.socket.send(messageString, (err?: Error): void => {
+			this.handleSend(messageString, (err?: Error): void => {
 
 				if (err) return reject(err);
 				LiSocket.logger.log(`Did send message (${message.id}).`);
@@ -107,6 +91,10 @@ export class LiSocket<
 			});
 
 		});
+	}
+
+	protected handleOnMessage(data: any): void {
+		this.onMessage(data).catch(LiSocket.logger.err);
 	}
 
 	private async onMessage(data: any): Promise<void> {
@@ -236,7 +224,7 @@ export class LiSocket<
 
 	}
 
-	private handleOnClose(code?: number, reason?: string): void {
+	protected handleOnClose(code?: number, reason?: string): void {
 
 		LiSocket.logger.log(`Connection did close with code '${code}' and message '${reason}'.`);
 		this.isConnected = false;
@@ -244,7 +232,7 @@ export class LiSocket<
 
 	}
 
-	private handleOnError(err: Error): void {
+	protected handleOnError(err: Error): void {
 
 		LiSocket.logger.err(`Connection receive error: ${err.name} '${err.message}'`);
 
@@ -302,10 +290,9 @@ export class LiSocket<
 
 	public getId(): string { return this.id; }
 
-	public async close(): Promise<void> {
+	public close(): void {
 
-		this.socket.close();
-		this.handleOnClose();
+		this.handleClose();
 
 	}
 
